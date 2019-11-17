@@ -13,7 +13,7 @@ from multiprocessing import Process, Value
 
 import numpy as np
 import gym
-import boardgame2 as bg2
+import boardgame2 as bg2git
 
 
 
@@ -101,9 +101,7 @@ class ReversiAgent(abc.ABC):
         return self.best_move
 
     @abc.abstractmethod
-    def search(
-            self, color, board, valid_actions, 
-            output_move_row, output_move_column):
+    def search(self, color, board, valid_actions, output_move_row, output_move_column):
         """
         Set the intended move to self._move.
         
@@ -132,9 +130,7 @@ class ReversiAgent(abc.ABC):
 class RandomAgent(ReversiAgent):
     """An agent that move randomly."""
     
-    def search(
-            self, color, board, valid_actions, 
-            output_move_row, output_move_column):
+    def search(self, color, board, valid_actions, output_move_row, output_move_column):
         """Set the intended move to the value of output_moves."""
         # If you want to "simulate a move", you can call the following function:
         # transition(board, self.player, valid_actions[0])
@@ -153,3 +149,57 @@ class RandomAgent(ReversiAgent):
             print(type(e).__name__, ':', e)
             print('search() Traceback (most recent call last): ')
             traceback.print_tb(e.__traceback__)
+
+class SmartAgent(ReversiAgent):
+    """An agent that move randomly."""
+    MAX, MIN = 1000000, -1000000
+    def search(self, color, board, valid_actions, output_move_row, output_move_column):
+        """Set the intended move to the value of output_moves."""
+        # If you want to "simulate a move", you can call the following function:
+        # transition(board, self.player, valid_actions[0])
+
+        # To prevent your agent to fail silently we should an
+        # explicit trackback printout.
+        try:
+            # while True:
+            #     pass
+            for x in valid_actions:
+                print(x)
+            transition(board, self.player, x)
+            randidx = random.randint(0, len(valid_actions) - 1)
+            random_action = valid_actions[randidx]
+            output_move_row.value = random_action[0]
+            output_move_column.value = random_action[1]
+        except Exception as e:
+            print(type(e).__name__, ':', e)
+            print('search() Traceback (most recent call last): ')
+            traceback.print_tb(e.__traceback__)
+    
+    def minimax(depth, nodeIndex, maximizingPlayer, values, alpha, beta):  
+    # Terminating condition. i.e  
+    # leaf node is reached  
+    if depth == 3:  
+        return _ENV.get_Valid().shape[0] #Eval Function
+    if maximizingPlayer:  
+        best = MIN 
+        # Recur for left and right children  
+        for i in range(0, 2):     
+            val = minimax(depth + 1, nodeIndex * 2 + i, False, values, alpha, beta)  
+            best = max(best, val)  
+            alpha = max(alpha, best)  
+            # Alpha Beta Pruning  
+            if beta <= alpha:  
+                break 
+        return best  
+    else: 
+        best = MAX 
+        # Recur for left and
+        # right children
+        for i in range(0, 2):  
+            val = minimax(depth + 1, nodeIndex * 2 + i, True, values, alpha, beta)  
+            best = min(best, val)  
+            beta = min(beta, best)
+            # Alpha Beta Pruning  
+            if beta <= alpha:  
+                break 
+        return best  
