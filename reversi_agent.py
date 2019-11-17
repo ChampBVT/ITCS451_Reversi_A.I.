@@ -13,7 +13,7 @@ from multiprocessing import Process, Value
 
 import numpy as np
 import gym
-import boardgame2 as bg2git
+import boardgame2 as bg2
 
 
 
@@ -181,9 +181,9 @@ class SmartAgent(ReversiAgent):
     if depth == 3:  
         return _ENV.get_Valid().shape[0] #Eval Function
     if maximizingPlayer:  
-        best = MIN 
+        best = MIN
         # Recur for left and right children  
-        for i in range(0, 2):     
+        for x in valid_actions:     
             val = minimax(depth + 1, nodeIndex * 2 + i, False, values, alpha, beta)  
             best = max(best, val)  
             alpha = max(alpha, best)  
