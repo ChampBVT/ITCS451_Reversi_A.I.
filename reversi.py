@@ -28,9 +28,9 @@ def clear_screen():
 
 def render(board, turn, prev_move=None, prev_turn=None):
     """Render on the screen."""
-    clear_screen()
+    #clear_screen()
     if prev_move is not None:
-        print(f'Previous Move: {prev_move} by {_name[prev_turn]}')
+        print(f'\nPrevious Move: {prev_move} by {_name[prev_turn]}')
     print(board)
     black_score = np.sum(board == bg2.BLACK)
     white_score = np.sum(board == bg2.WHITE)
@@ -88,7 +88,7 @@ async def main(black, white, timelimit=2):
                 skip = 0
         if skip >= 2:
             break
-        clear_screen()
+        #clear_screen()
         prev_turn = turn
         board, turn = env.get_next_state((board, turn), move)
         render(board, turn, move, prev_turn)
@@ -116,5 +116,5 @@ async def main(black, white, timelimit=2):
 
 if __name__ == "__main__":
     black = agents.RandomAgent(bg2.BLACK)
-    white = agents.RandomAgent(bg2.WHITE)
+    white = agents.SmartAgent(bg2.WHITE)
     asyncio.run(main(black, white, 10))

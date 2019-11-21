@@ -151,8 +151,73 @@ class RandomAgent(ReversiAgent):
             traceback.print_tb(e.__traceback__)
 
 class SmartAgent(ReversiAgent):
-    """An agent that move randomly."""
-    MAX, MIN = 1000000, -1000000
+    """Get Opponet function """
+    def getOpponent(self, color):
+        if color == 1:
+            return -1
+        else:
+            return 1
+
+    def minimax(self, depth, level, board, valid_actions, maximizingPlayer, alpha, beta):  
+    # Terminating condition. i.e  
+    # leaf node is reached
+        MAX, MIN = 1000000, -1000000
+        minEval = MAX
+        maxEval = MIN
+        best_action = None
+        if depth == 0:  
+            return self.evalFunction(board, self.player) #Eval Function
+        if maximizingPlayer:
+            best = MIN
+            # Recur for left and right children
+            for x in valid_actions:
+                new_board = transition(board,self.player, x)
+                new_opponentValidActions = self.get_validActions(new_board, self.getOpponent(self.player))
+                val = self.minimax(depth - 1, level + 1, new_board, new_opponentValidActions, False, alpha, beta)
+                best = max(best, val)
+                alpha = max(alpha, best)
+                print(" ", x, val)
+                # Alpha Beta Pruning
+                if maxEval < best:
+                    maxEval = best
+                    if level == 0:
+                        best_action = x
+                if beta <= alpha:
+                    print('kuyyyyyyyyyyyyyyyyyyyyyyyy')
+                    break
+            if(level != 0):     
+                return best
+            else:
+                return best, best_action
+        else: 
+            best = MAX 
+            # Recur for left and
+            # right children
+            for x in valid_actions:
+                new_board = transition(board, self.getOpponent(self.player), x)
+                new_opponentValidActions = self.get_validActions(new_board, self.player)
+                val = self.minimax(depth - 1, level + 1, new_board, new_opponentValidActions, True, alpha, beta)
+                best = min(best, val)
+                beta = min(beta, best)
+                print(" ", x, val)
+                if minEval > best:
+                    minEval = best
+                    if level == 0:
+                        best_action = x
+                # Alpha Beta Pruning  
+                if beta <= alpha:
+                    print('kuyyyyyyyyyyyyyyyyyyyyyyyy')
+                    break 
+            if(level != 0):     
+                return best
+            else:
+                return best, best_action
+
+    def get_validActions(self, board, player):
+        valids = _ENV.get_valid((board, player))
+        valids = np.array(list(zip(*valids.nonzero())))
+        return valids
+
     def search(self, color, board, valid_actions, output_move_row, output_move_column):
         """Set the intended move to the value of output_moves."""
         # If you want to "simulate a move", you can call the following function:
@@ -163,43 +228,34 @@ class SmartAgent(ReversiAgent):
         try:
             # while True:
             #     pass
-            for x in valid_actions:
-                print(x)
-            transition(board, self.player, x)
-            randidx = random.randint(0, len(valid_actions) - 1)
-            random_action = valid_actions[randidx]
-            output_move_row.value = random_action[0]
-            output_move_column.value = random_action[1]
+            best, best_action = self.minimax(10, 0, board, valid_actions, True, 100000, -100000)
+            if best_action is None and valid_actions is not None:
+                time.sleep(0.01625)
+                print(" Smart AI cannot making the decision")   
+                time.sleep(0.0625)    
+                print(" Switch to Random Decided")
+                time.sleep(0.0625)  
+                randidx = random.randint(0, len(valid_actions) - 1)
+                random_action = valid_actions[randidx]
+                output_move_row.value = random_action[0]
+                output_move_column.value = random_action[1]
+                print(" Smart AI Random Selected:"+ str(random_action))
+                time.sleep(0.0625)
+            elif best_action is not None:
+                 time.sleep(0.03125)  
+            # We can decided to decrease sleep time or remove it with print output
+                 print(" Smart AI is making the decision")
+                 time.sleep(0.03125)    
+                 output_move_row.value = best_action[0]
+                 output_move_column.value = best_action[1]
+                 print(" Smart AI Selected:" + str(best_action)+ 'because evalGives ' + str(best))
+                 time.sleep(0.03125)
         except Exception as e:
             print(type(e).__name__, ':', e)
             print('search() Traceback (most recent call last): ')
             traceback.print_tb(e.__traceback__)
-    
-    def minimax(depth, nodeIndex, maximizingPlayer, values, alpha, beta):  
-    # Terminating condition. i.e  
-    # leaf node is reached  
-    if depth == 3:  
-        return _ENV.get_Valid().shape[0] #Eval Function
-    if maximizingPlayer:  
-        best = MIN
-        # Recur for left and right children  
-        for x in valid_actions:     
-            val = minimax(depth + 1, nodeIndex * 2 + i, False, values, alpha, beta)  
-            best = max(best, val)  
-            alpha = max(alpha, best)  
-            # Alpha Beta Pruning  
-            if beta <= alpha:  
-                break 
-        return best  
-    else: 
-        best = MAX 
-        # Recur for left and
-        # right children
-        for i in range(0, 2):  
-            val = minimax(depth + 1, nodeIndex * 2 + i, True, values, alpha, beta)  
-            best = min(best, val)  
-            beta = min(beta, best)
-            # Alpha Beta Pruning  
-            if beta <= alpha:  
-                break 
-        return best  
+
+    def evalFunction(self, board, color):
+        opponentScore = np.sum(board == self.getOpponent(color))
+        myScore = np.sum(board == color)
+        return myScore - opponentScore
