@@ -115,6 +115,6 @@ async def main(black, white, timelimit=2):
 
 
 if __name__ == "__main__":
-    black = agents.RandomAgent(bg2.BLACK)
-    white = agents.SmartAgent(bg2.WHITE)
+    black = agents.SmartAgent(bg2.BLACK)
+    white = agents.ImprovedAgent(bg2.WHITE)
     asyncio.run(main(black, white, 10))
